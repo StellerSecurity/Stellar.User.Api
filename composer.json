@@ -21,16 +21,6 @@
         "phpunit/phpunit": "^10.1",
         "spatie/laravel-ignition": "^2.0"
     },
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/mondago/ApplicationInsights-PHP"
-        },
-        {
-            "type": "git",
-            "url": "https://github.com/mondago/laravel-azure-application-insights"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "App\\": "app/",
@@ -73,5 +63,15 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/mondago/ApplicationInsights-PHP"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/mondago/laravel-azure-application-insights"
+        }
+    ]
 }
