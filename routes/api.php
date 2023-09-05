@@ -25,5 +25,6 @@ Route::middleware(['basicAuth'])->group(function () {
                 Route::post('/createuser', 'create');
             });
         });
+
     });
 });
