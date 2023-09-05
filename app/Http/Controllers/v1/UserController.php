@@ -9,6 +9,7 @@ use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Psy\Util\Str;
 
 class UserController extends Controller
 {
@@ -38,7 +39,7 @@ class UserController extends Controller
         }
 
         $user = User::create([
-            'name' => null,
+            'name' => \Illuminate\Support\Str::random(16),
             'email' => $username,
             'password' => Hash::make($request->input('password'))
         ]);
