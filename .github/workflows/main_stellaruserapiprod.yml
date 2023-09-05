@@ -56,5 +56,5 @@ jobs:
         with:
           app-name: 'StellarUserApiProd'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F7AF2DF9C09742EAADB595ABBD2CCB2A }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A405D516658F4A67BA4C60257CA10806 }}
           package: .
