@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\UserService;
+use app\UserRole;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,10 +39,17 @@ class UserController extends Controller
             return response()->json(['response_code' => 401]);
         }
 
+        $role = $request->input('role');
+
+        if($role === null) {
+            $role = UserRole::CUSTOMER;
+        }
+
         $user = User::create([
             'name' => \Illuminate\Support\Str::random(16),
             'email' => $username,
-            'password' => Hash::make($request->input('password'))
+            'password' => Hash::make($request->input('password')),
+            'role' => $role
         ]);
 
         return response()->json(['response_code' => 200, 'user' => $user]);
