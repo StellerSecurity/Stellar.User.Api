@@ -21,6 +21,29 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
+    public function login(Request $request) {
+
+        $username = $request->input('username');
+        $password = $request->input('password');
+
+        $user = User::where('username', $username)->first();
+
+        if($user === null) {
+            return response()->json(['response_code' => 400]);
+        }
+
+        if(!Hash::check($password, $user->password)) {
+            return response()->json(['response_code' => 400]);
+        }
+
+        if (Hash::needsRehash($user->password)) {
+            $user->password = Hash::make($password);
+            $user->save();
+        }
+
+        return response()->json(['response_code' => 200, 'user' => $user]);
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
