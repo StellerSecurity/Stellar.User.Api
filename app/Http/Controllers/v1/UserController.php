@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\UserService;
-use app\UserRole;
+use App\UserRole;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -41,7 +41,9 @@ class UserController extends Controller
             $user->save();
         }
 
-        return response()->json(['response_code' => 200, 'user' => $user]);
+        $token = $user->createToken("CustomerToken")->accessToken;
+
+        return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
     }
 
     /**
@@ -50,7 +52,7 @@ class UserController extends Controller
      */
     public function create(Request $request) : JsonResponse {
 
-        $username = $request->input('username');
+        $username = time();
 
         if($username === null) {
             return response()->json(['response_code' => 400]);
@@ -75,7 +77,9 @@ class UserController extends Controller
             'role' => $role
         ]);
 
-        return response()->json(['response_code' => 200, 'user' => $user]);
+        $token = $user->createToken("CustomerToken")->accessToken;
+
+        return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
     }
 
 }
