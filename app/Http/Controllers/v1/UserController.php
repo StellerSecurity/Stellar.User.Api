@@ -52,7 +52,7 @@ class UserController extends Controller
      */
     public function create(Request $request) : JsonResponse {
 
-        $username = time();
+        $username = $request->input('username');
 
         if($username === null) {
             return response()->json(['response_code' => 400]);
