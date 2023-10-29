@@ -20,11 +20,20 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware(['basicAuth'])->group(function () {
     Route::prefix('v1')->group(function () {
+
+
+        Route::prefix('personaltokencontroller')->group(function () {
+            Route::controller(\App\Http\Controllers\V1\PersonalTokenController::class)->group(function () {
+                Route::get('/{token}', 'find');
+            });
+        });
+
         Route::prefix('usercontroller')->group(function () {
             Route::controller(\App\Http\Controllers\V1\UserController::class)->group(function () {
                 Route::post('/createuser', 'create');
                 Route::get('/createuser', 'create');
                 Route::post('/login', 'login');
+                Route::get('/createuser', 'create');
             });
         });
 
