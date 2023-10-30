@@ -26,7 +26,7 @@ class UserController extends Controller
         $username = $request->input('username');
         $password = $request->input('password');
 
-        $user = User::where('username', $username)->first();
+        $user = User::where('email', $username)->first();
 
         if($user === null) {
             return response()->json(['response_code' => 400]);
