@@ -31,9 +31,7 @@ Route::middleware(['basicAuth'])->group(function () {
         Route::prefix('usercontroller')->group(function () {
             Route::controller(\App\Http\Controllers\V1\UserController::class)->group(function () {
                 Route::post('/createuser', 'create');
-                Route::get('/createuser', 'create');
                 Route::post('/login', 'login');
-                Route::get('/createuser', 'create');
             });
         });
 
