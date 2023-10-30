@@ -41,7 +41,7 @@ class UserController extends Controller
             $user->save();
         }
 
-        $token = $user->createToken("UserToken");
+        $token = $user->createToken("UserToken")->plainTextToken;
 
         return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
     }
@@ -77,7 +77,7 @@ class UserController extends Controller
             'role' => $role
         ]);
 
-        $token = $user->createToken("UserToken");
+        $token = $user->createToken("UserToken")->plainTextToken;
 
         return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
     }
