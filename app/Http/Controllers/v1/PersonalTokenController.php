@@ -23,6 +23,7 @@ class PersonalTokenController extends Controller
             return response()->json(['response_code' => 400]);
         }
 
+
         return response()->json(['token' => $personalToken, 'response_code' => 200]);
 
     }
