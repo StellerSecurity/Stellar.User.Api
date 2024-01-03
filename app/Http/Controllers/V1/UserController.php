@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v1;
+namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -26,7 +26,7 @@ class UserController extends Controller
         $username = $request->input('username');
         $password = $request->input('password');
 
-        $user = User::where('email', $username)->first();
+        $user = User::where([['email', $username]])->first();
 
         if($user === null) {
             return response()->json(['response_code' => 400]);
