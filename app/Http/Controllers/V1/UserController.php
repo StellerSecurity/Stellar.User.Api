@@ -21,6 +21,13 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
+    public function user(int $id): JsonResponse
+    {
+        $user = User::find($id);
+
+        return response()->json($user);
+    }
+
     public function login(Request $request) {
 
         $username = $request->input('username');
@@ -74,6 +81,7 @@ class UserController extends Controller
             'name' => \Illuminate\Support\Str::random(16),
             'email' => $username,
             'password' => Hash::make($request->input('password')),
+            'encrypt_key' => '',
             'role' => $role
         ]);
 
