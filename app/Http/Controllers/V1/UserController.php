@@ -25,7 +25,9 @@ class UserController extends Controller
     {
         $user = User::find($id);
 
-        return response()->json($user);
+        $token = $user->createToken("UserToken")->plainTextToken;
+
+        return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
     }
 
     public function login(Request $request) {
