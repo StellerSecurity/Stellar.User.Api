@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ResetPasswordLink;
 use App\Models\ResetPassword;
 use App\Models\User;
 use App\ResetPasswordStatus;
@@ -13,6 +14,7 @@ use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 
 class UserController extends Controller
@@ -58,6 +60,39 @@ class UserController extends Controller
         return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
     }
 
+    public function verifyresetpasswordandupdate(Request $request) {
+
+        $token = $request->input('token');
+        $email = $request->input('email');
+        $password = $request->input('password');
+
+        $passwordReset = User::where([['email', $email], ['token', $token]])->first();
+
+        if($passwordReset === null) {
+            return response()->json(['response_code' => 400, 'response_message' => 'Not found']);
+        }
+
+        if($passwordReset->expires_at < Carbon::now()) {
+            $passwordReset->status = ResetPasswordStatus::EXPIRED;
+            $passwordReset->save();
+            return response()->json(['response_code' => 401, 'response_message' => 'Expired']);
+        }
+
+        if($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
+            return response()->json(['response_code' => 402, 'response_message' => 'Token already used.']);
+        }
+
+        $passwordReset->status = ResetPasswordStatus::USED;
+        $passwordReset->save();
+
+        $user = User::where('email', $email)->first();
+        $user->password = Hash::make($password);
+        $user->save();
+
+        return response()->json(['response_code' => 200, 'response_message' => 'Password reset successfully']);
+
+    }
+
     public function sendresetpasswordlink(Request $request)
     {
 
@@ -82,7 +117,19 @@ class UserController extends Controller
             'status' => ResetPasswordStatus::ACTIVE->value
         ]);
 
-        // send email here..
+        // send email here
+        $mail_data = [
+            'name' => $email,
+            'from' => 'info@stellarsecurity.com',
+            'url' => 'https://stellarsecurity.com/stellar-account/resetpasswordtoken?token=' . $token . '&email=' . $email,
+        ];
+
+        try {
+            Mail::to($email)
+                ->send(new ResetPasswordLink($mail_data));
+        } catch(\Exception $e) {
+            return response()->json(['response_code' => 401, 'response_message' => $e->getMessage()]);
+        }
 
         return response()->json(['response_code' => 200, 'response_message' => 'OK. Reset password link sent to your email.']);
 
