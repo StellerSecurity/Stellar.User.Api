@@ -63,7 +63,9 @@ class UserController extends Controller
             return response()->json(['response_code' => 400]);
         }
 
-        $user->update($request->all());
+        $user->fill($request->all());
+        $user->save();
+
 
         return response()->json(['response_code' => 200, 'user' => $user]);
 
