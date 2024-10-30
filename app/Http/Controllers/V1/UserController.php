@@ -55,6 +55,21 @@ class UserController extends Controller
         return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
     }
 
+    public function patch(Request $request) {
+
+        $user = User::find($request->input('id'));
+
+        if($user === null) {
+            return response()->json(['response_code' => 400]);
+        }
+
+        $user->update($request->all());
+
+        return response()->json(['response_code' => 200, 'user' => $user]);
+
+
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse

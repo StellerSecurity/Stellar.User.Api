@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'vpn_sdk',
         'role'
     ];
 
