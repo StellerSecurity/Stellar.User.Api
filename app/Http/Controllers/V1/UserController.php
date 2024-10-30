@@ -82,8 +82,7 @@ class UserController extends Controller
             return response()->json(['response_code' => 402, 'response_message' => 'Token already used.']);
         }
 
-        $passwordReset->status = ResetPasswordStatus::USED;
-        $passwordReset->save();
+        $passwordReset->delete();
 
         $user = User::where('email', $email)->first();
         $user->password = Hash::make($password);
