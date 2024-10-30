@@ -33,6 +33,7 @@ Route::middleware(['basicAuth'])->group(function () {
                 Route::post('/createuser', 'create');
                 Route::post('/login', 'login');
                 Route::get('/user/{id}', 'user');
+                Route::get('/sendresetpasswordlink', 'sendresetpasswordlink');
                 Route::patch('/patch', 'patch');
             });
         });

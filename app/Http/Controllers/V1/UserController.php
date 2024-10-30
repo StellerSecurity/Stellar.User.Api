@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\ResetPassword;
 use App\Models\User;
+use App\ResetPasswordStatus;
 use App\Services\UserService;
 use App\UserRole;
+use Carbon\Carbon;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Psy\Util\Str;
+
 
 class UserController extends Controller
 {
@@ -53,6 +56,36 @@ class UserController extends Controller
         $token = $user->createToken("UserToken")->plainTextToken;
 
         return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
+    }
+
+    public function sendresetpasswordlink(Request $request)
+    {
+
+        $email = $request->input('email');
+
+        $user = User::where('email', $email)->first();
+
+        if($user === null) {
+            return response()->json(['response_code' => 400, 'response_message' => 'User not found']);
+        }
+
+        $token = \Illuminate\Support\Str::random(36);
+
+        $hashed = Hash::make($token);
+
+        $expires_at = Carbon::now()->addHours(48);
+
+        $resetpassword = ResetPassword::create([
+            'email' => $email,
+            'token' => $hashed,
+            'expires_at' => $expires_at,
+            'status' => ResetPasswordStatus::ACTIVE->value
+        ]);
+
+        // send email here..
+
+        return response()->json(['response_code' => 200, 'response_message' => 'OK. Reset password link sent to your email.']);
+
     }
 
     public function patch(Request $request) {
