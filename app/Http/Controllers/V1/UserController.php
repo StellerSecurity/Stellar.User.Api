@@ -79,7 +79,7 @@ class UserController extends Controller
         }
 
         if($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
-            return response()->json(['response_code' => 402, 'response_message' => 'Token already used.']);
+            return response()->json(['response_code' => 402, 'response_message' => 'Token does not exist, already used or not known ' . $passwordReset->status]);
         }
 
         $passwordReset->delete();
