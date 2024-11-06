@@ -66,14 +66,14 @@ class UserController extends Controller
         $email = $request->input('email');
         $password = $request->input('password');
 
-        $passwordReset = User::where([['email', $email], ['token', $token]])->first();
+        $passwordReset = ResetPassword::where([['email', $email], ['token', $token]])->first();
 
         if($passwordReset === null) {
             return response()->json(['response_code' => 400, 'response_message' => 'Not found']);
         }
 
         if($passwordReset->expires_at < Carbon::now()) {
-            $passwordReset->status = ResetPasswordStatus::EXPIRED;
+            $passwordReset->status = ResetPasswordStatus::EXPIRED->value;
             $passwordReset->save();
             return response()->json(['response_code' => 401, 'response_message' => 'Expired']);
         }
