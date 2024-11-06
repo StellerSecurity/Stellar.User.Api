@@ -100,14 +100,14 @@ class UserController extends Controller
         $user = User::where('email', $email)->first();
 
         if($user === null) {
-            return response()->json(['response_code' => 400, 'response_message' => 'User not found']);
+            return response()->json(['response_code' => 400, 'response_message' => 'User not found (null).']);
         }
 
-        $token = \Illuminate\Support\Str::random(36);
+        $token = \Illuminate\Support\Str::random(42);
 
         $hashed = Hash::make($token);
 
-        $expires_at = Carbon::now()->addHours(48);
+        $expires_at = Carbon::now()->addHours(24);
 
         $resetpassword = ResetPassword::create([
             'email' => $email,
@@ -172,7 +172,7 @@ class UserController extends Controller
         $role = $request->input('role');
 
         if($role === null) {
-            $role = UserRole::CUSTOMER;
+            $role = UserRole::CUSTOMER->value;
         }
 
         $user = User::create([

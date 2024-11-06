@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Your Email Subject</title>
+    <title>Reset Password</title>
     <style>
         /* Reset some default styles */
         body, p {
@@ -52,7 +52,12 @@
         <h1>Reset Password</h1>
     </div>
     <div class="content">
-        <p>Hello</p>
+        <p>You have sent a request to reset your password for your Stellar ID. Please click on the link below to reset.</p><br>
+        <p><a href="<?php echo e($data['url']); ?>"><?php echo e($data['url']); ?></a></p><br><br>
+
+        The link will expire in 24 hours.<hr><hr>
+
+        If this was not you, you can just ignore this email.
     </div>
 </div>
 </body>
