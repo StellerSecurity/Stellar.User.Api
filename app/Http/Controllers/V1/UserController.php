@@ -64,7 +64,7 @@ class UserController extends Controller
 
         $token = $request->input('token');
         $username = $request->input('username');
-        $password = $request->input('password');
+        $new_password = $request->input('new_password');
 
         $passwordReset = ResetPassword::where([['email', $username], ['token', $token]])->first();
 
@@ -85,7 +85,7 @@ class UserController extends Controller
         $passwordReset->delete();
 
         $user = User::where('email', $username)->first();
-        $user->password = Hash::make($password);
+        $user->password = Hash::make($new_password);
         $user->save();
 
         return response()->json(['response_code' => 200, 'response_message' => 'Password reset successfully']);
