@@ -63,10 +63,10 @@ class UserController extends Controller
     public function verifyresetpasswordandupdate(Request $request) {
 
         $token = $request->input('token');
-        $username = $request->input('username');
+        $email = $request->input('email');
         $new_password = $request->input('new_password');
 
-        $passwordReset = ResetPassword::where([['email', $username], ['token', $token]])->first();
+        $passwordReset = ResetPassword::where([['email', $email], ['token', $token]])->first();
 
         if($passwordReset === null) {
             return response()->json(['response_code' => 400, 'response_message' => 'Not found']);
@@ -84,7 +84,7 @@ class UserController extends Controller
 
         $passwordReset->delete();
 
-        $user = User::where('email', $username)->first();
+        $user = User::where('email', $email)->first();
         $user->password = Hash::make($new_password);
         $user->save();
 
