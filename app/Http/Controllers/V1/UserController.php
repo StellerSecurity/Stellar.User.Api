@@ -63,10 +63,10 @@ class UserController extends Controller
     public function verifyresetpasswordandupdate(Request $request) {
 
         $token = $request->input('token');
-        $email = $request->input('email');
+        $username = $request->input('username');
         $password = $request->input('password');
 
-        $passwordReset = ResetPassword::where([['email', $email], ['token', $token]])->first();
+        $passwordReset = ResetPassword::where([['email', $username], ['token', $token]])->first();
 
         if($passwordReset === null) {
             return response()->json(['response_code' => 400, 'response_message' => 'Not found']);
@@ -84,7 +84,7 @@ class UserController extends Controller
 
         $passwordReset->delete();
 
-        $user = User::where('email', $email)->first();
+        $user = User::where('email', $username)->first();
         $user->password = Hash::make($password);
         $user->save();
 
@@ -120,7 +120,7 @@ class UserController extends Controller
         $mail_data = [
             'name' => $email,
             'from' => 'info@stellarsecurity.com',
-            'url' => 'https://stellarsecurity.com/stellar-account/resetpasswordtoken?token=' . $token . '&email=' . $email,
+            'url' => 'https://stellarsecurity.com/stellar-account/resetpasswordtoken?token=' . $token . '&username=' . $email,
         ];
 
         try {
