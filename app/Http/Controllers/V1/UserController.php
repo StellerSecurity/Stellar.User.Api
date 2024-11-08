@@ -160,13 +160,13 @@ class UserController extends Controller
         $username = $request->input('username');
 
         if($username === null) {
-            return response()->json(['response_code' => 400]);
+            return response()->json(['response_code' => 400, 'response_message' => 'No username provided']);
         }
 
         $user = $this->userService->findByUsername($username);
 
         if($user !== null) {
-            return response()->json(['response_code' => 401]);
+            return response()->json(['response_code' => 401, 'response_message' => 'Username already exists']);
         }
 
         $role = $request->input('role');
@@ -185,7 +185,7 @@ class UserController extends Controller
 
         $token = $user->createToken("UserToken")->plainTextToken;
 
-        return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
+        return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token, 'response_message' => 'OK']);
     }
 
 }
