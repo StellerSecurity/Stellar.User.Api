@@ -43,11 +43,11 @@ class UserController extends Controller
         $user = User::where([['email', $username]])->first();
 
         if($user === null) {
-            return response()->json(['response_code' => 400]);
+            return response()->json(['response_code' => 400, 'response_message' => 'Username not found']);
         }
 
         if(!Hash::check($password, $user->password)) {
-            return response()->json(['response_code' => 400]);
+            return response()->json(['response_code' => 400, 'response_message' => 'Password is wrong.']);
         }
 
         if (Hash::needsRehash($user->password)) {
@@ -57,7 +57,7 @@ class UserController extends Controller
 
         $token = $user->createToken("UserToken")->plainTextToken;
 
-        return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
+        return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token, 'response_message' => 'OK']);
     }
 
     public function verifyresetpasswordandupdate(Request $request) {
