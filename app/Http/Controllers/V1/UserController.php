@@ -120,7 +120,7 @@ class UserController extends Controller
         $mail_data = [
             'name' => $email,
             'from' => 'info@stellarsecurity.com',
-            'url' => 'https://stellarsecurity.com/stellar-account/resetpasswordtoken?token=' . $token . '&username=' . $email,
+            'url' => 'https://stellarsecurity.com/stellar-account/resetpasswordtoken?token=' . $token . '&email=' . $email,
         ];
 
         try {
