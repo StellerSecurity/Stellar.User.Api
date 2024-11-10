@@ -72,6 +72,10 @@ class UserController extends Controller
             return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and token was not found.']);
         }
 
+        if(strlen($new_password) < 2) {
+            return response()->json(['response_code' => 399, 'response_message' => 'The new password must be atleast 2 characters long.']);
+        }
+
         if($passwordReset->expires_at < Carbon::now()) {
             $passwordReset->status = ResetPasswordStatus::EXPIRED->value;
             $passwordReset->save();
