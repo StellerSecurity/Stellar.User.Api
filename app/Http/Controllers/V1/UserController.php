@@ -62,7 +62,13 @@ class UserController extends Controller
 
     public function verifyresetpasswordandupdate(Request $request) {
 
-        $token = Hash::make($request->input('token'));
+        $token = $request->input('token');
+
+        if($token === null) {
+            return response()->json(['response_code' => 400, 'response_message' => 'Token not found']);
+        }
+
+        $token = Hash::make($token);
         $email = $request->input('email');
         $new_password = $request->input('new_password');
 
