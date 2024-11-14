@@ -190,7 +190,8 @@ class UserController extends Controller
             'email' => $username,
             'password' => Hash::make($request->input('password')),
             'encrypt_key' => '',
-            'role' => $role
+            'role' => $role,
+            'vpn_sdk' => $request->input('vpn_sdk')
         ]);
 
         $token = $user->createToken("UserToken")->plainTextToken;
