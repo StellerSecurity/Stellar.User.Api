@@ -185,13 +185,18 @@ class UserController extends Controller
             $role = UserRole::CUSTOMER->value;
         }
 
+        $vpn_sdk = $request->input('vpn_sdk');
+        if($vpn_sdk === null) {
+            $vpn_sdk = 0;
+        }
+
         $user = User::create([
             'name' => \Illuminate\Support\Str::random(16),
             'email' => $username,
             'password' => Hash::make($request->input('password')),
             'encrypt_key' => '',
             'role' => $role,
-            'vpn_sdk' => $request->input('vpn_sdk')
+            'vpn_sdk' => $vpn_sdk
         ]);
 
         $token = $user->createToken("UserToken")->plainTextToken;
