@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 
 class UserController extends Controller
@@ -55,7 +56,13 @@ class UserController extends Controller
             $user->save();
         }
 
-        $token = $user->createToken("UserToken")->plainTextToken;
+        $tokenSource = $request->input('token');
+
+        if(empty($tokenSource)) {
+            $tokenSource = "UserToken";
+        }
+
+        $token = $user->createToken($tokenSource)->plainTextToken;
 
         return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token, 'response_message' => 'OK']);
     }
@@ -113,7 +120,7 @@ class UserController extends Controller
             return response()->json(['response_code' => 400, 'response_message' => 'User not found (null).']);
         }
 
-        $token = \Illuminate\Support\Str::random(42);
+        $token = Str::random(42);
 
         $hashed = Hash::make($token);
 
@@ -191,7 +198,7 @@ class UserController extends Controller
         }
 
         $user = User::create([
-            'name' => \Illuminate\Support\Str::random(16),
+            'name' => Str::random(16),
             'email' => $username,
             'password' => Hash::make($request->input('password')),
             'encrypt_key' => '',
@@ -199,7 +206,13 @@ class UserController extends Controller
             'vpn_sdk' => $vpn_sdk
         ]);
 
-        $token = $user->createToken("UserToken")->plainTextToken;
+        $tokenSource = $request->input('token');
+
+        if(empty($tokenSource)) {
+            $tokenSource = "UserToken";
+        }
+
+        $token = $user->createToken($tokenSource)->plainTextToken;
 
         return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token, 'response_message' => 'OK']);
     }
