@@ -122,7 +122,7 @@ class UserController extends Controller
 
         $token = Str::random(42);
 
-        $hashed = Hash::make($token);
+        $hashed_token = Hash::make($token);
 
         $expires_at = Carbon::now()->addHours(24);
 
@@ -136,7 +136,7 @@ class UserController extends Controller
 
         $resetpassword = ResetPassword::create([
             'email' => $email,
-            'token' => $hashed,
+            'token' => $hashed_token,
             'expires_at' => $expires_at,
             'status' => ResetPasswordStatus::ACTIVE->value,
             'confirmation_code' => $confirmation_code_hashed
