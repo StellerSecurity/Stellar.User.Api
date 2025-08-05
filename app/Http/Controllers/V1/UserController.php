@@ -109,7 +109,7 @@ class UserController extends Controller
 
     }
 
-    public function sendresetpasswordlink(Request $request)
+    public function sendresetpasswordlink(Request $request): JsonResponse
     {
 
         $email = $request->input('email');
@@ -126,16 +126,26 @@ class UserController extends Controller
 
         $expires_at = Carbon::now()->addHours(24);
 
+        $confirmation_code = $request->input('confirmation_code');
+
+        $confirmation_code_hashed = null;
+
+        if($confirmation_code !== null) {
+            $confirmation_code_hashed = Hash::make($confirmation_code);
+        }
+
         $resetpassword = ResetPassword::create([
             'email' => $email,
             'token' => $hashed,
             'expires_at' => $expires_at,
-            'status' => ResetPasswordStatus::ACTIVE->value
+            'status' => ResetPasswordStatus::ACTIVE->value,
+            'confirmation_code' => $confirmation_code_hashed
         ]);
 
         // send email here
         $mail_data = [
             'name' => $email,
+            'confirmation_code' => $confirmation_code,
             'from' => 'info@stellarsecurity.com',
             'url' => 'https://stellarsecurity.com/stellar-account/resetpasswordtoken?token=' . $token . '&email=' . $email,
         ];
@@ -147,11 +157,12 @@ class UserController extends Controller
             return response()->json(['response_code' => 401, 'response_message' => $e->getMessage()]);
         }
 
-        return response()->json(['response_code' => 200, 'response_message' => 'OK. Reset password link sent to your email.']);
+        return response()->json(['response_code' => 200, 'response_message' => 'Reset password link sent to your email.']);
 
     }
 
-    public function patch(Request $request) {
+    public function patch(Request $request): JsonResponse
+    {
 
         $user = User::find($request->input('id'));
 
@@ -162,9 +173,7 @@ class UserController extends Controller
         $user->fill($request->all());
         $user->save();
 
-
         return response()->json(['response_code' => 200, 'user' => $user]);
-
 
     }
 
