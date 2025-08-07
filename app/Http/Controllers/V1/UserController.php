@@ -86,7 +86,7 @@ class UserController extends Controller
         }
 
         if(strlen($new_password) < 4) {
-            return response()->json(['response_code' => 399, 'response_message' => 'The new password must be atleast 2 characters long.']);
+            return response()->json(['response_code' => 399, 'response_message' => 'The new password must be atleast 4 characters long.']);
         }
 
         if($passwordReset->expires_at < Carbon::now()) {
