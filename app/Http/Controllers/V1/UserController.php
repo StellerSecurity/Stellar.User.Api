@@ -156,40 +156,6 @@ class UserController extends Controller
 
     }
 
-    public function verifyconfirmationcode(Request $request): JsonResponse
-    {
-
-        $confirmation_code = $request->input('confirmation_code');
-        $email = $request->input('email');
-
-        if($confirmation_code === null) {
-            return response()->json(['response_code' => 400, 'response_message' => 'Confirmation code not found']);
-        }
-
-        if($email === null) {
-            return response()->json(['response_code' => 400, 'response_message' => 'Email not found']);
-        }
-
-        $hashed_confirmation_code = Hash::make($confirmation_code);
-
-        $passwordReset = ResetPassword::where([['email', $email], ['confirmation_code', $hashed_confirmation_code]])->first();
-
-        if($passwordReset === null) {
-            return response()->json(['response_code' => 400, 'response_message' => 'The confirmation code is invalid.']);
-        }
-
-        if($passwordReset->confirmation_code == null) {
-            return response()->json(['response_code' => 401, 'response_message' => 'Confirmation code not found']);
-        }
-
-        if($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
-            return response()->json(['response_code' => 402, 'response_message' => 'Token does not exist, already used or not known ' . $passwordReset->status]);
-        }
-
-        return response()->json(['response_code' => 200, 'response_message' => 'OK']);
-
-    }
-
     public function sendresetpasswordlink(Request $request): JsonResponse
     {
 

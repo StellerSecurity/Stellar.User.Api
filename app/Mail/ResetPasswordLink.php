@@ -14,11 +14,26 @@ class ResetPasswordLink extends Mailable
 {
     use Queueable, SerializesModels;
 
+    private string $title;
+
+    private string $view_blade;
+
     public function __construct(public array $data)
     {
+
+        $title = "StellarSecurity.com - Reset Password";
+        $this->view_blade = "mails.resetpasswordlink";
+        if($data['confirmation_code'] !== null)
+        {
+            $title = "StellarSecurity.com - Confirmation Code";
+            $this->view_blade = "mails.resetpassword-confirmationcode";
+        }
+
+        $this->title = $title;
+
         return new Envelope(
             from: new Address($this->data['from'], $this->data['name']),
-            subject: 'StellarSecurity.com - Reset Password  ',
+            subject: $this->title,
         );
     }
 
@@ -28,14 +43,14 @@ class ResetPasswordLink extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'StellarSecurity.com - Reset Password ',
+            subject: $this->title,
         );
     }
 
 
     public function build()
     {
-        return $this->view('mails.resetpasswordlink')->with('data', $this->data);
+        return $this->view($this->view_blade)->with('data', $this->data);
     }
 
     /**
