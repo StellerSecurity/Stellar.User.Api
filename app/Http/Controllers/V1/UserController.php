@@ -59,7 +59,7 @@ class UserController extends Controller
         $tokenSource = $request->input('token');
 
         if(empty($tokenSource)) {
-            $tokenSource = "UserToken";
+            $tokenSource = "Stellar.User.API";
         }
 
         $token = $user->createToken($tokenSource)->plainTextToken;
@@ -85,7 +85,7 @@ class UserController extends Controller
             return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and token was not found.']);
         }
 
-        if(strlen($new_password) < 2) {
+        if(strlen($new_password) < 4) {
             return response()->json(['response_code' => 399, 'response_message' => 'The new password must be atleast 2 characters long.']);
         }
 
@@ -106,6 +106,87 @@ class UserController extends Controller
         $user->save();
 
         return response()->json(['response_code' => 200, 'response_message' => 'Password reset successfully']);
+
+    }
+
+    public function verifyresetpasswordconfirmationcode(Request $request)
+    {
+
+        $confirmation_code = $request->input('confirmation_code');
+
+        if ($confirmation_code === null) {
+            return response()->json(['response_code' => 400, 'response_message' => 'Confirmation not found']);
+        }
+
+        $hashed_confirmation_code = Hash::make($confirmation_code);
+        $email = $request->input('email');
+        $new_password = $request->input('new_password');
+
+        $passwordReset = ResetPassword::where([['email', $email], ['confirmation_code', $hashed_confirmation_code]])->first();
+
+        if ($passwordReset === null) {
+            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and token was not found.']);
+        }
+
+        if($passwordReset->confirmation_code == null) {
+            return response()->json(['response_code' => 401, 'response_message' => 'Confirmation code not found']);
+        }
+
+        if (strlen($new_password) < 4) {
+            return response()->json(['response_code' => 399, 'response_message' => 'The new password must be atleast 4 characters long.']);
+        }
+
+        if ($passwordReset->expires_at < Carbon::now()) {
+            $passwordReset->status = ResetPasswordStatus::EXPIRED->value;
+            $passwordReset->save();
+            return response()->json(['response_code' => 401, 'response_message' => 'The RESET is expired.']);
+        }
+
+        if ($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
+            return response()->json(['response_code' => 402, 'response_message' => 'Code does not exist, already used or not known ' . $passwordReset->status]);
+        }
+
+        $passwordReset->delete();
+
+        $user = User::where('email', $email)->first();
+        $user->password = Hash::make($new_password);
+        $user->save();
+
+        return response()->json(['response_code' => 200, 'response_message' => 'Password reset successfully']);
+
+    }
+
+    public function verifyconfirmationcode(Request $request): JsonResponse
+    {
+
+        $confirmation_code = $request->input('confirmation_code');
+        $email = $request->input('email');
+
+        if($confirmation_code === null) {
+            return response()->json(['response_code' => 400, 'response_message' => 'Confirmation code not found']);
+        }
+
+        if($email === null) {
+            return response()->json(['response_code' => 400, 'response_message' => 'Email not found']);
+        }
+
+        $hashed_confirmation_code = Hash::make($confirmation_code);
+
+        $passwordReset = ResetPassword::where([['email', $email], ['confirmation_code', $hashed_confirmation_code]])->first();
+
+        if($passwordReset === null) {
+            return response()->json(['response_code' => 400, 'response_message' => 'The confirmation code is invalid.']);
+        }
+
+        if($passwordReset->confirmation_code == null) {
+            return response()->json(['response_code' => 401, 'response_message' => 'Confirmation code not found']);
+        }
+
+        if($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
+            return response()->json(['response_code' => 402, 'response_message' => 'Token does not exist, already used or not known ' . $passwordReset->status]);
+        }
+
+        return response()->json(['response_code' => 200, 'response_message' => 'OK']);
 
     }
 
