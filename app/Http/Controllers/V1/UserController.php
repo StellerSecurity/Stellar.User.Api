@@ -125,7 +125,7 @@ class UserController extends Controller
         $passwordReset = ResetPassword::where([['email', $email], ['confirmation_code', $hashed_confirmation_code]])->first();
 
         if ($passwordReset === null) {
-            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and token was not found.']);
+            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and confirmation code was not found.']);
         }
 
         if($passwordReset->confirmation_code == null) {
