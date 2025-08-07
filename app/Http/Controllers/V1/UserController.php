@@ -215,7 +215,7 @@ class UserController extends Controller
             Mail::to($email)
                 ->send(new ResetPasswordLink($mail_data));
         } catch(\Exception $e) {
-            return response()->json(['response_code' => 401, 'response_message' => $e->getMessage()]);
+            return response()->json(['response_code' => 401, 'response_message' => 'Email could not be sent.']);
         }
 
         return response()->json(['response_code' => 200, 'response_message' => 'Reset password link sent to your email.']);
@@ -240,7 +240,7 @@ class UserController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function create(Request $request) : JsonResponse {
 
