@@ -75,14 +75,27 @@ class UserController extends Controller
             return response()->json(['response_code' => 400, 'response_message' => 'Token not found']);
         }
 
-        $hashed_token = Hash::make($token);
         $email = $request->input('email');
         $new_password = $request->input('new_password');
 
-        $passwordReset = ResetPassword::where([['email', $email], ['token', $hashed_token]])->first();
+        $passwordReset = ResetPassword::where('email', $email)->get();
 
         if($passwordReset === null) {
-            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email '.$email.' and token '. $token . ' was not found.']);
+            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and token  was not found (1).']);
+        }
+
+        $found = false;
+
+        foreach ($passwordReset as $reset) {
+
+            if(Hash::check($token, $reset->token)) {
+                $found = true;
+                break;
+            }
+        }
+
+        if(!$found) {
+            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and token was not found. (2)']);
         }
 
         if(strlen($new_password) < 4) {
