@@ -82,7 +82,7 @@ class UserController extends Controller
         $passwordReset = ResetPassword::where([['email', $email], ['token', $hashed_token]])->first();
 
         if($passwordReset === null) {
-            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and token '. $token . ' was not found.']);
+            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email '.$email.' and token '. $token . ' was not found.']);
         }
 
         if(strlen($new_password) < 4) {
