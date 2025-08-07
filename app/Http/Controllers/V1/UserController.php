@@ -265,7 +265,7 @@ class UserController extends Controller
         $tokenSource = $request->input('token');
 
         if(empty($tokenSource)) {
-            $tokenSource = "UserToken";
+            $tokenSource = "Stellar.User.API";
         }
 
         $token = $user->createToken($tokenSource)->plainTextToken;
