@@ -90,6 +90,7 @@ class UserController extends Controller
 
             if(Hash::check($token, $reset->token)) {
                 $found = true;
+                $passwordReset = $reset;
                 break;
             }
         }
