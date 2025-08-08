@@ -132,18 +132,29 @@ class UserController extends Controller
             return response()->json(['response_code' => 400, 'response_message' => 'Confirmation not found']);
         }
 
-        $hashed_confirmation_code = Hash::make($confirmation_code);
         $email = $request->input('email');
         $new_password = $request->input('new_password');
 
-        $passwordReset = ResetPassword::where([['email', $email], ['confirmation_code', $hashed_confirmation_code]])->first();
+        $passwordReset = ResetPassword::where([['email', $email], ['confirmation_code', '!=', null]])->get();
 
-        if ($passwordReset === null) {
-            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and confirmation code was not found.']);
+        if($passwordReset === null) {
+            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and confirmation was not found (1).']);
         }
 
-        if($passwordReset->confirmation_code == null) {
-            return response()->json(['response_code' => 401, 'response_message' => 'Confirmation code not found']);
+
+        $found = false;
+
+        foreach ($passwordReset as $reset) {
+
+            if(Hash::check($confirmation_code, $reset->confirmation_code)) {
+                $found = true;
+                $passwordReset = $reset;
+                break;
+            }
+        }
+
+        if(!$found) {
+            return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and confirmation code was not found. (2)']);
         }
 
         if (strlen($new_password) < 4) {
