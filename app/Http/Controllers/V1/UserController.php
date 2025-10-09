@@ -204,6 +204,9 @@ class UserController extends Controller
             $confirmation_code_hashed = Hash::make($confirmation_code);
         }
 
+        // delete all previous records, so we always know, only one is active.
+        ResetPassword::where('email', $email)->delete();
+
         $resetpassword = ResetPassword::create([
             'email' => $email,
             'token' => $hashed_token,
