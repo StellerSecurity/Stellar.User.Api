@@ -291,17 +291,20 @@ class UserController extends Controller
 
             $user = User::create([
                 'name' => Str::random(16),
-                'email' => $username,
+                'email' => $username, // (optional) ensure you lowercase earlier
                 'password' => Hash::make($request->input('password')),
-                'encrypt_key' => '',
                 'role' => $role,
+                'encrypt_key' => '', // not used.
                 'vpn_sdk' => $vpn_sdk,
+
                 // E2EE blobs (client-provided)
-                'eak'            => base64_decode($request->string('eak'), true),
-                'kdf_salt'       => base64_decode($request->string('kdf_salt'), true),
+                'eak'            => ($e = base64_decode($request->string('eak'), true)) !== false ? $e : abort(422,'Invalid eak'),
+                'kdf_salt'       => ($s = base64_decode($request->string('kdf_salt'), true)) !== false ? $s : abort(422,'Invalid kdf_salt'),
                 'kdf_params'     => $request->input('kdf_params'),
                 'crypto_version' => $request->input('crypto_version', 'v1'),
-                'eak_recovery'   => $request->filled('eak_recovery') ? base64_decode($request->string('eak_recovery'), true) : null,
+                'eak_recovery'   => $request->filled('eak_recovery')
+                    ? (($r = base64_decode($request->string('eak_recovery'), true)) !== false ? $r : abort(422,'Invalid eak_recovery'))
+                    : null,
                 'recovery_meta'  => $request->input('recovery_meta'),
             ]);
 
