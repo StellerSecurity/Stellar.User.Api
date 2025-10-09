@@ -21,9 +21,30 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
         'vpn_sdk',
-        'role'
+
+        // E2EE envelope (client-provided)
+        'eak',
+        'kdf_salt',
+        'kdf_params',
+        'crypto_version',
+        'eak_recovery',
+        'recovery_meta',
+
+        // Migration flags
+        'e2ee_status',       // 'legacy' | 'enabled'
+        'e2ee_enabled_at',
+
+        // Future (OPAQUE)
+        'opaque_record',
     ];
+
+    // Normalize email to lowercase on set
+    public function setEmailAttribute($value): void
+    {
+        $this->attributes['email'] = mb_strtolower($value);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -31,8 +52,8 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password','remember_token',
+        'eak','kdf_salt','eak_recovery','opaque_record',
     ];
 
     /**
@@ -42,6 +63,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'kdf_params'    => 'array',
+        'recovery_meta' => 'array'
     ];
 }

@@ -141,11 +141,9 @@ class UserController extends Controller
             return response()->json(['response_code' => 400, 'response_message' => 'The combination between email and confirmation was not found (1).']);
         }
 
-
         $found = false;
 
         foreach ($passwordReset as $reset) {
-
             if(Hash::check($confirmation_code, $reset->confirmation_code)) {
                 $found = true;
                 $passwordReset = $reset;
@@ -278,14 +276,36 @@ class UserController extends Controller
             $vpn_sdk = 0;
         }
 
-        $user = User::create([
-            'name' => Str::random(16),
-            'email' => $username,
-            'password' => Hash::make($request->input('password')),
-            'encrypt_key' => '',
-            'role' => $role,
-            'vpn_sdk' => $vpn_sdk
-        ]);
+        if($request->string('eak') == null) {
+
+            $user = User::create([
+                'name' => Str::random(16),
+                'email' => $username,
+                'password' => Hash::make($request->input('password')),
+                'encrypt_key' => '',
+                'role' => $role,
+                'vpn_sdk' => $vpn_sdk
+            ]);
+
+        } else {
+
+            $user = User::create([
+                'name' => Str::random(16),
+                'email' => $username,
+                'password' => Hash::make($request->input('password')),
+                'encrypt_key' => '',
+                'role' => $role,
+                'vpn_sdk' => $vpn_sdk,
+                // E2EE blobs (client-provided)
+                'eak'            => base64_decode($request->string('eak'), true),
+                'kdf_salt'       => base64_decode($request->string('kdf_salt'), true),
+                'kdf_params'     => $request->input('kdf_params'),
+                'crypto_version' => $request->input('crypto_version', 'v1'),
+                'eak_recovery'   => $request->filled('eak_recovery') ? base64_decode($request->string('eak_recovery'), true) : null,
+                'recovery_meta'  => $request->input('recovery_meta'),
+            ]);
+
+        }
 
         $tokenSource = $request->input('token');
 
