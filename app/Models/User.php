@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,58 +11,53 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    /** Mass assignable */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'vpn_sdk',
-
+        'name','email','password','role','vpn_sdk',
         // E2EE envelope (client-provided)
-        'eak',
-        'kdf_salt',
-        'kdf_params',
-        'crypto_version',
-        'eak_recovery',
-        'recovery_meta',
-
-        // Migration flags
-        'e2ee_status',       // 'legacy' | 'enabled'
-        'e2ee_enabled_at',
-
+        'eak','kdf_salt','kdf_params','crypto_version','eak_recovery','recovery_meta',
         // Future (OPAQUE)
         'opaque_record',
     ];
 
-    // Normalize email to lowercase on set
+    /** Normalize email to lowercase on set */
     public function setEmailAttribute($value): void
     {
-        $this->attributes['email'] = mb_strtolower($value);
+        $this->attributes['email'] = mb_strtolower((string)$value);
     }
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    /** Append base64 views of BLOBs */
+    protected $appends = ['eak_b64','kdf_salt_b64'];
+
+    /** Hide raw BLOBs & secrets from JSON */
     protected $hidden = [
-        'password','remember_token',
-        'eak','kdf_salt','eak_recovery','opaque_record',
+        'password',
+        'remember_token',
+        'eak',          // raw blob
+        'kdf_salt',     // raw blob
+        'eak_recovery',
+        'opaque_record',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
+    /** Casts */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'kdf_params'    => 'array',
-        'recovery_meta' => 'array'
+        'kdf_params'        => 'array',
+        'recovery_meta'     => 'array',
     ];
+
+    /** Accessors: base64 encode BLOBs for API output */
+    public function getEakB64Attribute(): ?string
+    {
+        return array_key_exists('eak', $this->attributes) && !is_null($this->attributes['eak'])
+            ? base64_encode($this->attributes['eak'])
+            : null;
+    }
+
+    public function getKdfSaltB64Attribute(): ?string
+    {
+        return array_key_exists('kdf_salt', $this->attributes) && !is_null($this->attributes['kdf_salt'])
+            ? base64_encode($this->attributes['kdf_salt'])
+            : null;
+    }
 }
