@@ -71,6 +71,8 @@ class UserController extends Controller
             return response()->json(['response_code' => 400, 'response_message' => 'Username or password is wrong']);
         }
 
+        RateLimiter::clear($throttleKey);
+
         if (Hash::needsRehash($user->password)) {
             $user->password = Hash::make($password);
             $user->save();
