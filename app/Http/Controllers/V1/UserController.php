@@ -44,11 +44,11 @@ class UserController extends Controller
         $user = User::where([['email', $username]])->first();
 
         if($user === null) {
-            return response()->json(['response_code' => 400, 'response_message' => 'Username not found']);
+            return response()->json(['response_code' => 400, 'response_message' => 'Username or password is wrong']);
         }
 
         if(!Hash::check($password, $user->password)) {
-            return response()->json(['response_code' => 400, 'response_message' => 'Password is wrong.']);
+            return response()->json(['response_code' => 400, 'response_message' => 'Username or password is wrong']);
         }
 
         if (Hash::needsRehash($user->password)) {
