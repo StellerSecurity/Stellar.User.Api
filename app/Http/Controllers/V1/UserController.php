@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\RateLimiter;
 
 
 class UserController extends Controller
@@ -36,10 +37,29 @@ class UserController extends Controller
         return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
     }
 
+
     public function login(Request $request) {
+
+        $throttleKey = $this->throttleKey($request);
+
+        if (RateLimiter::tooManyAttempts($throttleKey, $perMinute = 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return response()->json([
+                'response_code'    => 429,
+                'response_message' => 'Too many login attempts. Please try again in ' . $seconds . ' seconds.',
+            ], 429);
+        }
+
+        // Hit counter (decay 60 sekunder)
+        RateLimiter::hit($throttleKey, 60);
 
         $username = $request->input('username');
         $password = $request->input('password');
+
+        if($username === null || $password === null) {
+            return response()->json(['response_code' => 400, 'response_message' => 'Username or password is wrong']);
+        }
 
         $user = User::where([['email', $username]])->first();
 
@@ -322,6 +342,15 @@ class UserController extends Controller
         $token = $user->createToken($tokenSource)->plainTextToken;
 
         return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token, 'response_message' => 'OK']);
+    }
+
+    /**
+     * Generate a unique throttle key per user + IP.
+     */
+    protected function throttleKey(Request $request): string
+    {
+        // Only username-based throttling – IP is ignored on purpose
+        return Str::lower($request->input('username', ''));
     }
 
 }
