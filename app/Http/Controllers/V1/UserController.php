@@ -267,7 +267,6 @@ class UserController extends Controller
 
         $data = $request->all();
 
-        // E2EE blobs (samme logik som i create)
         if ($request->has('eak')) {
             $e = base64_decode($request->string('eak'), true);
             if ($e === false) {
