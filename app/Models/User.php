@@ -60,4 +60,7 @@ class User extends Authenticatable
             ? base64_encode($this->attributes['kdf_salt'])
             : null;
     }
+
+
+
 }

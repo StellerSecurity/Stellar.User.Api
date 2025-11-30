@@ -265,7 +265,34 @@ class UserController extends Controller
             return response()->json(['response_code' => 400]);
         }
 
-        $user->fill($request->all());
+        $data = $request->all();
+
+        // E2EE blobs (samme logik som i create)
+        if ($request->has('eak')) {
+            $e = base64_decode($request->string('eak'), true);
+            if ($e === false) {
+                return response()->json(['response_code' => 422, 'response_message' => 'Invalid eak'], 422);
+            }
+            $data['eak'] = $e;
+        }
+
+        if ($request->has('kdf_salt')) {
+            $s = base64_decode($request->string('kdf_salt'), true);
+            if ($s === false) {
+                return response()->json(['response_code' => 422, 'response_message' => 'Invalid kdf_salt'], 422);
+            }
+            $data['kdf_salt'] = $s;
+        }
+
+        if ($request->filled('eak_recovery')) {
+            $r = base64_decode($request->string('eak_recovery'), true);
+            if ($r === false) {
+                return response()->json(['response_code' => 422, 'response_message' => 'Invalid eak_recovery'], 422);
+            }
+            $data['eak_recovery'] = $r;
+        }
+
+        $user->fill($data);
         $user->save();
 
         return response()->json(['response_code' => 200, 'user' => $user]);
