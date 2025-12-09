@@ -10,7 +10,6 @@ use App\ResetPasswordStatus;
 use App\Services\UserService;
 use App\UserRole;
 use Carbon\Carbon;
-use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
