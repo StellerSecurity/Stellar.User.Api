@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
+    private const MIN_PASSWORD_LENGTH = 4;
 
     private UserService $userService;
 
@@ -41,7 +42,11 @@ class UserController extends Controller
 
         $token = $user->createToken("UserToken")->plainTextToken;
 
-        return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
+        return response()->json([
+            'response_code' => 200,
+            'user'          => $user,
+            'token'         => $token,
+        ]);
     }
 
     public function login(Request $request): JsonResponse
@@ -67,7 +72,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Username or password is wrong',
-            ]);
+            ], 400);
         }
 
         $user = User::where('email', $username)->first();
@@ -76,14 +81,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Username or password is wrong',
-            ]);
+            ], 400);
         }
 
         if (! Hash::check($password, $user->password)) {
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Username or password is wrong',
-            ]);
+            ], 400);
         }
 
         RateLimiter::clear($throttleKey);
@@ -120,14 +125,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Token not found',
-            ]);
+            ], 400);
         }
 
         if ($email === null) {
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Email not found',
-            ]);
+            ], 400);
         }
 
         // Rate limit per email on reset attempts
@@ -142,11 +147,11 @@ class UserController extends Controller
         }
         RateLimiter::hit($resetKey, 300); // 5 minutes decay
 
-        if ($new_password === null || strlen($new_password) < 6) {
+        if ($new_password === null || strlen($new_password) < self::MIN_PASSWORD_LENGTH) {
             return response()->json([
                 'response_code'    => 399,
-                'response_message' => 'The new password must be at least 6 characters long.',
-            ]);
+                'response_message' => 'The new password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters long.',
+            ], 399);
         }
 
         $resets = ResetPassword::where('email', $email)->get();
@@ -155,7 +160,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'The combination between email and token was not found (1).',
-            ]);
+            ], 400);
         }
 
         $passwordReset = null;
@@ -171,7 +176,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'The combination between email and token was not found. (2)',
-            ]);
+            ], 400);
         }
 
         if ($passwordReset->expires_at < Carbon::now()) {
@@ -181,14 +186,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 401,
                 'response_message' => 'The token is expired.',
-            ]);
+            ], 401);
         }
 
         if ($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
             return response()->json([
                 'response_code'    => 402,
                 'response_message' => 'Token does not exist, already used or not known ' . $passwordReset->status,
-            ]);
+            ], 402);
         }
 
         $passwordReset->delete();
@@ -210,7 +215,7 @@ class UserController extends Controller
         return response()->json([
             'response_code'    => 200,
             'response_message' => 'Password reset successfully',
-        ]);
+        ], 200);
     }
 
     public function verifyresetpasswordconfirmationcode(Request $request): JsonResponse
@@ -223,14 +228,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Confirmation not found',
-            ]);
+            ], 400);
         }
 
         if ($email === null) {
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Email not found',
-            ]);
+            ], 400);
         }
 
         // Rate limit per email on confirmation attempts
@@ -245,11 +250,11 @@ class UserController extends Controller
         }
         RateLimiter::hit($resetKey, 300);
 
-        if ($new_password === null || strlen($new_password) < 8) {
+        if ($new_password === null || strlen($new_password) < self::MIN_PASSWORD_LENGTH) {
             return response()->json([
                 'response_code'    => 399,
-                'response_message' => 'The new password must be at least 8 characters long.',
-            ]);
+                'response_message' => 'The new password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters long.',
+            ], 399);
         }
 
         $resets = ResetPassword::where('email', $email)
@@ -260,7 +265,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'The combination between email and confirmation was not found (1).',
-            ]);
+            ], 400);
         }
 
         $passwordReset = null;
@@ -276,7 +281,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'The combination between email and confirmation code was not found. (2)',
-            ]);
+            ], 400);
         }
 
         if ($passwordReset->expires_at < Carbon::now()) {
@@ -286,14 +291,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 401,
                 'response_message' => 'The RESET is expired.',
-            ]);
+            ], 401);
         }
 
         if ($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
             return response()->json([
                 'response_code'    => 402,
                 'response_message' => 'Code does not exist, already used or not known ' . $passwordReset->status,
-            ]);
+            ], 402);
         }
 
         $passwordReset->delete();
@@ -315,7 +320,7 @@ class UserController extends Controller
         return response()->json([
             'response_code'    => 200,
             'response_message' => 'Password reset successfully',
-        ]);
+        ], 200);
     }
 
     public function sendresetpasswordlink(Request $request): JsonResponse
@@ -326,7 +331,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Email is required.',
-            ]);
+            ], 400);
         }
 
         // Basic rate limit on sending reset links per email
@@ -349,7 +354,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 200,
                 'response_message' => 'If your email is registered, a reset link has been sent.',
-            ]);
+            ], 200);
         }
 
         $token       = Str::random(42);
@@ -363,7 +368,7 @@ class UserController extends Controller
             $confirmation_code_hashed = Hash::make($confirmation_code);
         }
 
-        // delete all previous records, so we always know only one is active.
+        // Delete all previous records, so we always know only one is active.
         ResetPassword::where('email', $email)->delete();
 
         ResetPassword::create([
@@ -388,13 +393,13 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 200,
                 'response_message' => 'If your email is registered, a reset link has been sent.',
-            ]);
+            ], 200);
         }
 
         return response()->json([
             'response_code'    => 200,
             'response_message' => 'If your email is registered, a reset link has been sent.',
-        ]);
+        ], 200);
     }
 
     public function patch(Request $request): JsonResponse
@@ -405,7 +410,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'User not found.',
-            ]);
+            ], 400);
         }
 
         // Only allow specific fields to be updated
@@ -450,27 +455,40 @@ class UserController extends Controller
         return response()->json([
             'response_code' => 200,
             'user'          => $user,
-        ]);
+        ], 200);
     }
 
     public function create(Request $request) : JsonResponse
     {
         $username = $request->input('username');
 
-        if ($username === null) {
+        if (empty($username)) {
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'No username provided',
-            ]);
+            ], 400);
         }
 
-        $user = $this->userService->findByUsername($username);
+        // Rate limit per username on account creation
+        $createKey = 'user_create:' . Str::lower($username);
+        if (RateLimiter::tooManyAttempts($createKey, 5)) {
+            $seconds = RateLimiter::availableIn($createKey);
 
-        if ($user !== null) {
+            return response()->json([
+                'response_code'    => 429,
+                'response_message' => 'Too many account creation attempts. Please try again in ' . $seconds . ' seconds.',
+            ], 429);
+        }
+
+        RateLimiter::hit($createKey, 3600); // 1 hour decay
+
+        $existing = $this->userService->findByUsername($username);
+
+        if ($existing !== null) {
             return response()->json([
                 'response_code'    => 401,
                 'response_message' => 'Username already exists',
-            ]);
+            ], 401);
         }
 
         $role = $request->input('role');
@@ -486,11 +504,11 @@ class UserController extends Controller
 
         $password = $request->input('password');
 
-        if ($password === null || strlen($password) < 8) {
+        if ($password === null || strlen($password) < self::MIN_PASSWORD_LENGTH) {
             return response()->json([
                 'response_code'    => 399,
-                'response_message' => 'The password must be at least 8 characters long.',
-            ]);
+                'response_message' => 'The password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters long.',
+            ], 399);
         }
 
         if ($request->string('eak') == null) {
@@ -535,12 +553,14 @@ class UserController extends Controller
 
         $token = $user->createToken($tokenSource)->plainTextToken;
 
+        RateLimiter::clear($createKey);
+
         return response()->json([
             'response_code'    => 200,
             'user'             => $user,
             'token'            => $token,
             'response_message' => 'OK',
-        ]);
+        ], 200);
     }
 
     /**
@@ -551,5 +571,4 @@ class UserController extends Controller
         // Only username-based throttling – IP is ignored on purpose
         return Str::lower($request->input('username', ''));
     }
-
 }
