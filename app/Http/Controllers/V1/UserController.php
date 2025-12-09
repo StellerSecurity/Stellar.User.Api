@@ -491,11 +491,8 @@ class UserController extends Controller
             ], 401);
         }
 
-        $role = $request->input('role');
-
-        if ($role === null) {
-            $role = UserRole::CUSTOMER->value;
-        }
+        // we force all creations to be customer.
+        $role = UserRole::CUSTOMER->value;
 
         $vpn_sdk = $request->input('vpn_sdk');
         if ($vpn_sdk === null) {
