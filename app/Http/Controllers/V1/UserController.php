@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    private const MIN_PASSWORD_LENGTH = 4;
+    private const MIN_PASSWORD_LENGTH = 6;
 
     private UserService $userService;
 

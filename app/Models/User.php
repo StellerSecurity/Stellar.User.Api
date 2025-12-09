@@ -33,10 +33,15 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'eak',          // raw blob
-        'kdf_salt',     // raw blob
+
+        // E2EE blobs and crypto internals
+        'eak',
+        'kdf_salt',
+        'kdf_params',
         'eak_recovery',
+        'recovery_meta',
         'opaque_record',
+        'encrypt_key',
     ];
 
     /** Casts */
