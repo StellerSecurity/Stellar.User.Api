@@ -32,6 +32,13 @@ class UserController extends Controller
     {
         $user = User::find($id);
 
+        if (! $user) {
+            return response()->json([
+                'response_code'    => 404,
+                'response_message' => 'User not found',
+            ], 404);
+        }
+
         $token = $user->createToken("UserToken")->plainTextToken;
 
         return response()->json(['response_code' => 200, 'user' => $user, 'token' => $token]);
