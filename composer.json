@@ -10,7 +10,8 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
-        "mondago/laravel-application-insights": "^0.7.0"
+        "mondago/laravel-application-insights": "^0.7.0",
+        "stellarsecurity/laravel-hardening": "^1.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
