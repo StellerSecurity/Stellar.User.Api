@@ -531,7 +531,7 @@ class UserController extends Controller
             ], 399);
         }
 
-        if ($request->string('eak') == null) {
+        if ($request->input('eak') == null) {
 
             $user = User::create([
                 'name'        => Str::random(16),
