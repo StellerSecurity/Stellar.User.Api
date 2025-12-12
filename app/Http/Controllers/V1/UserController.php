@@ -64,7 +64,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 429,
                 'response_message' => 'Too many login attempts. Please try again in ' . $seconds . ' seconds.',
-            ], 429);
+            ]);
         }
 
         // Decay: 60 seconds
@@ -77,7 +77,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Username or password is wrong',
-            ], 400);
+            ]);
         }
 
         $user = User::where('email', $username)->first();
@@ -86,14 +86,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Username or password is wrong',
-            ], 400);
+            ]);
         }
 
         if (! Hash::check($password, $user->password)) {
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Username or password is wrong',
-            ], 400);
+            ]);
         }
 
         RateLimiter::clear($throttleKey);
@@ -130,14 +130,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Token not found',
-            ], 400);
+            ]);
         }
 
         if ($email === null) {
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Email not found',
-            ], 400);
+            ]);
         }
 
         // Rate limit per email on reset attempts
@@ -148,7 +148,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 429,
                 'response_message' => 'Too many reset attempts. Please try again in ' . $seconds . ' seconds.',
-            ], 429);
+            ]);
         }
         RateLimiter::hit($resetKey, 300); // 5 minutes decay
 
@@ -156,7 +156,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 399,
                 'response_message' => 'The new password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters long.',
-            ], 399);
+            ]);
         }
 
         $resets = ResetPassword::where('email', $email)->get();
@@ -165,7 +165,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'The combination between email and token was not found (1).',
-            ], 400);
+            ]);
         }
 
         $passwordReset = null;
@@ -181,7 +181,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'The combination between email and token was not found. (2)',
-            ], 400);
+            ]);
         }
 
         if ($passwordReset->expires_at < Carbon::now()) {
@@ -233,14 +233,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Confirmation not found',
-            ], 400);
+            ]);
         }
 
         if ($email === null) {
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Email not found',
-            ], 400);
+            ]);
         }
 
         // Rate limit per email on confirmation attempts
@@ -251,7 +251,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 429,
                 'response_message' => 'Too many reset attempts. Please try again in ' . $seconds . ' seconds.',
-            ], 429);
+            ]);
         }
         RateLimiter::hit($resetKey, 300);
 
@@ -270,7 +270,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'The combination between email and confirmation was not found (1).',
-            ], 400);
+            ]);
         }
 
         $passwordReset = null;
@@ -286,7 +286,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'The combination between email and confirmation code was not found. (2)',
-            ], 400);
+            ]);
         }
 
         if ($passwordReset->expires_at < Carbon::now()) {
@@ -336,7 +336,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Email is required.',
-            ], 400);
+            ]);
         }
 
         // Basic rate limit on sending reset links per email
@@ -347,7 +347,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 429,
                 'response_message' => 'Too many reset requests. Please try again in ' . $seconds . ' seconds.',
-            ], 429);
+            ]);
         }
 
         RateLimiter::hit($sendKey, 900); // 15 minutes
@@ -416,7 +416,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'User id is required.',
-            ], 400);
+            ]);
         }
 
         $user = User::find($id);
@@ -425,7 +425,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'User not found.',
-            ], 400);
+            ]);
         }
 
         // Only allow specific fields to be updated
@@ -489,7 +489,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'No username provided',
-            ], 400);
+            ]);
         }
 
         // Rate limit per username on account creation
@@ -500,7 +500,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 429,
                 'response_message' => 'Too many account creation attempts. Please try again in ' . $seconds . ' seconds.',
-            ], 429);
+            ]);
         }
 
         RateLimiter::hit($createKey, 3600); // 1 hour decay
@@ -528,7 +528,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 399,
                 'response_message' => 'The password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters long.',
-            ], 399);
+            ]);
         }
 
         if ($request->input('eak') == null) {
