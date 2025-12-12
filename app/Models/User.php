@@ -26,12 +26,15 @@ class User extends Authenticatable
         $this->attributes['email'] = mb_strtolower((string)$value);
     }
 
+    /** Append base64 views of BLOBs */
+    protected $appends = ['eak_b64','kdf_salt_b64'];
 
-    /** Hide raw BLOBs & secrets from JSON */
     protected $hidden = [
         'password',
         'remember_token',
         'encrypt_key',
+        'eak',
+        'kdf_salt',
     ];
 
     /** Casts */
