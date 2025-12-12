@@ -191,14 +191,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 401,
                 'response_message' => 'The token is expired.',
-            ], 401);
+            ],);
         }
 
         if ($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
             return response()->json([
                 'response_code'    => 402,
                 'response_message' => 'Token does not exist, already used or not known ' . $passwordReset->status,
-            ], 402);
+            ]);
         }
 
         $passwordReset->delete();
@@ -209,7 +209,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 404,
                 'response_message' => 'User not found.',
-            ], 404);
+            ]);
         }
 
         $user->password = Hash::make($new_password);
@@ -259,7 +259,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 399,
                 'response_message' => 'The new password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters long.',
-            ], 399);
+            ]);
         }
 
         $resets = ResetPassword::where('email', $email)
@@ -296,14 +296,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 401,
                 'response_message' => 'The RESET is expired.',
-            ], 401);
+            ]);
         }
 
         if ($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
             return response()->json([
                 'response_code'    => 402,
                 'response_message' => 'Code does not exist, already used or not known ' . $passwordReset->status,
-            ], 402);
+            ]);
         }
 
         $passwordReset->delete();
@@ -314,7 +314,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 404,
                 'response_message' => 'User not found.',
-            ], 404);
+            ]);
         }
 
         $user->password = Hash::make($new_password);
@@ -511,7 +511,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 401,
                 'response_message' => 'Username already exists',
-            ], 401);
+            ]);
         }
 
         // we force all creations to be customer.
