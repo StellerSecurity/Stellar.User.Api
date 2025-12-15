@@ -37,6 +37,7 @@ Route::middleware(['basicAuth'])->group(function () {
                 Route::patch('/patch', 'patch');
 
                 Route::post('/verifyresetpasswordconfirmationcode', 'verifyresetpasswordconfirmationcode');
+                Route::post('/checkresetpasswordconfirmationcode', 'checkresetpasswordconfirmationcode');
 
 
                 Route::post('/verifyresetpasswordandupdate', 'verifyresetpasswordandupdate');

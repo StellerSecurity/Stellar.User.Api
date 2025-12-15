@@ -223,6 +223,92 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function checkresetpasswordconfirmationcode(Request $request): JsonResponse
+    {
+        $confirmation_code = $request->input('confirmation_code');
+        $email             = $request->input('email');
+
+        if ($confirmation_code === null) {
+            return response()->json([
+                'response_code'    => 400,
+                'response_message' => 'Confirmation not found',
+            ], 400);
+        }
+
+        if ($email === null) {
+            return response()->json([
+                'response_code'    => 400,
+                'response_message' => 'Email not found',
+            ], 400);
+        }
+
+        // Rate limit per email on confirmation attempts
+        $resetKey = 'reset_code:' . Str::lower($email);
+        if (RateLimiter::tooManyAttempts($resetKey, 5)) {
+            $seconds = RateLimiter::availableIn($resetKey);
+
+            return response()->json([
+                'response_code'    => 429,
+                'response_message' => 'Too many reset attempts. Please try again in ' . $seconds . ' seconds.',
+            ], 429);
+        }
+        RateLimiter::hit($resetKey, 300); // 5 minutes decay
+
+        $resets = ResetPassword::where('email', $email)
+            ->whereNotNull('confirmation_code')
+            ->get();
+
+        if ($resets->isEmpty()) {
+            return response()->json([
+                'response_code'    => 400,
+                'response_message' => 'The combination between email and confirmation was not found (1).',
+            ], 400);
+        }
+
+        $passwordReset = null;
+
+        foreach ($resets as $reset) {
+            if (Hash::check($confirmation_code, $reset->confirmation_code)) {
+                $passwordReset = $reset;
+                break;
+            }
+        }
+
+        if (! $passwordReset) {
+            return response()->json([
+                'response_code'    => 400,
+                'response_message' => 'The combination between email and confirmation code was not found. (2)',
+            ], 400);
+        }
+
+        if ($passwordReset->expires_at < Carbon::now()) {
+            $passwordReset->status = ResetPasswordStatus::EXPIRED->value;
+            $passwordReset->save();
+
+            return response()->json([
+                'response_code'    => 401,
+                'response_message' => 'The code is expired.',
+            ], 401);
+        }
+
+        if ($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
+            return response()->json([
+                'response_code'    => 402,
+                'response_message' => 'Code does not exist, already used or not known ' . $passwordReset->status,
+            ], 402);
+        }
+
+        // Success: we only verify the code exists and is valid.
+        // We do NOT delete it and do NOT update password here.
+        RateLimiter::clear($resetKey);
+
+        return response()->json([
+            'response_code'    => 200,
+            'response_message' => 'Confirmation code verified',
+        ], 200);
+    }
+
+
     public function verifyresetpasswordconfirmationcode(Request $request): JsonResponse
     {
         $confirmation_code = $request->input('confirmation_code');
