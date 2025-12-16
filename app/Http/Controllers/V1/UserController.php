@@ -232,14 +232,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Confirmation not found',
-            ], 400);
+            ]);
         }
 
         if ($email === null) {
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Email not found',
-            ], 400);
+            ]);
         }
 
         // Rate limit per email on confirmation attempts
@@ -250,7 +250,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 429,
                 'response_message' => 'Too many reset attempts. Please try again in ' . $seconds . ' seconds.',
-            ], 429);
+            ]);
         }
         RateLimiter::hit($resetKey, 300); // 5 minutes decay
 
@@ -262,7 +262,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'The combination between email and confirmation was not found (1).',
-            ], 400);
+            ]);
         }
 
         $passwordReset = null;
@@ -278,7 +278,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'The combination between email and confirmation code was not found. (2)',
-            ], 400);
+            ]);
         }
 
         if ($passwordReset->expires_at < Carbon::now()) {
@@ -288,14 +288,14 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 401,
                 'response_message' => 'The code is expired.',
-            ], 401);
+            ]);
         }
 
         if ($passwordReset->status !== ResetPasswordStatus::ACTIVE->value) {
             return response()->json([
                 'response_code'    => 402,
                 'response_message' => 'Code does not exist, already used or not known ' . $passwordReset->status,
-            ], 402);
+            ]);
         }
 
         // Success: we only verify the code exists and is valid.
