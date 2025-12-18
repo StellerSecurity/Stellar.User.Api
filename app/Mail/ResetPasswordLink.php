@@ -26,7 +26,7 @@ class ResetPasswordLink extends Mailable
         if($data['confirmation_code'] !== null)
         {
             $title = "StellarSecurity.com - Confirmation Code";
-            $this->view_blade = "mails.resetpasswordlink";
+            $this->view_blade = "mails.resetpassword-confirmationcode";
         }
 
         $this->title = $title;
