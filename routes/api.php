@@ -35,6 +35,7 @@ Route::middleware(['basicAuth'])->group(function () {
                 Route::get('/user/{id}', 'user');
                 Route::post('/sendresetpasswordlink', 'sendresetpasswordlink');
                 Route::patch('/patch', 'patch');
+                Route::patch('/changepassword', 'changepassword');
 
                 Route::post('/verifyresetpasswordconfirmationcode', 'verifyresetpasswordconfirmationcode');
                 Route::post('/checkresetpasswordconfirmationcode', 'checkresetpasswordconfirmationcode');

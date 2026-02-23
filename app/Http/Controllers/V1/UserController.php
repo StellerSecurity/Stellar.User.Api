@@ -677,4 +677,73 @@ class UserController extends Controller
         // Only username-based throttling – IP is ignored on purpose
         return Str::lower($request->input('username', ''));
     }
+
+    public function changepassword(Request $request): JsonResponse
+    {
+        $user_id = $request->input('user_id');
+        $currentPassword = $request->input('current_password');
+        $newPassword = $request->input('new_password');
+
+        if (empty($user_id)) {
+            return response()->json([
+                'response_code'    => 400,
+                'response_message' => 'User id is required.',
+            ], 400);
+        }
+
+        if ($currentPassword === null || $newPassword === null) {
+            return response()->json([
+                'response_code'    => 400,
+                'response_message' => 'Current password and new password are required.',
+            ], 400);
+        }
+
+        if (strlen($newPassword) < self::MIN_PASSWORD_LENGTH) {
+            return response()->json([
+                'response_code'    => 399,
+                'response_message' => 'The new password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters long.',
+            ], 399);
+        }
+
+        $user = User::find($user_id);
+
+        if ($user === null) {
+            return response()->json([
+                'response_code'    => 404,
+                'response_message' => 'User not found.',
+            ], 404);
+        }
+
+        // Rate limit per user
+        $changeKey = 'password_change:' . $user->id;
+        if (RateLimiter::tooManyAttempts($changeKey, 5)) {
+            $seconds = RateLimiter::availableIn($changeKey);
+
+            return response()->json([
+                'response_code'    => 429,
+                'response_message' => 'Too many password change attempts. Please try again in ' . $seconds . ' seconds.',
+            ], 429);
+        }
+
+        RateLimiter::hit($changeKey, 300); // 5 min decay
+
+        if (! Hash::check($currentPassword, $user->password)) {
+            return response()->json([
+                'response_code'    => 400,
+                'response_message' => 'Current password is wrong.',
+            ], 400);
+        }
+
+        // Update password
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        RateLimiter::clear($changeKey);
+
+        return response()->json([
+            'response_code'    => 200,
+            'response_message' => 'Password changed successfully',
+        ], 200);
+    }
+
 }
