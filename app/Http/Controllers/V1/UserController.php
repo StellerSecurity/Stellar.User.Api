@@ -688,21 +688,21 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'User id is required.',
-            ], 400);
+            ]);
         }
 
         if ($currentPassword === null || $newPassword === null) {
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Current password and new password are required.',
-            ], 400);
+            ]);
         }
 
         if (strlen($newPassword) < self::MIN_PASSWORD_LENGTH) {
             return response()->json([
                 'response_code'    => 399,
                 'response_message' => 'The new password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters long.',
-            ], 399);
+            ]);
         }
 
         $user = User::find($user_id);
@@ -711,7 +711,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 404,
                 'response_message' => 'User not found.',
-            ], 404);
+            ]);
         }
 
         // Rate limit per user
@@ -722,7 +722,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 429,
                 'response_message' => 'Too many password change attempts. Please try again in ' . $seconds . ' seconds.',
-            ], 429);
+            ]);
         }
 
         RateLimiter::hit($changeKey, 300); // 5 min decay
@@ -731,7 +731,7 @@ class UserController extends Controller
             return response()->json([
                 'response_code'    => 400,
                 'response_message' => 'Current password is wrong.',
-            ], 400);
+            ]);
         }
 
         // Update password
