@@ -10,6 +10,7 @@ use App\ResetPasswordStatus;
 use App\Services\UserService;
 use App\UserRole;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -676,6 +677,67 @@ class UserController extends Controller
     {
         // Only username-based throttling – IP is ignored on purpose
         return Str::lower($request->input('username', ''));
+    }
+
+    public function deleteuser(Request $request): JsonResponse
+    {
+        $user_id = $request->input('user_id');
+        $currentPassword = $request->input('current_password');
+
+        if (empty($user_id)) {
+            return response()->json([
+                'response_code'    => 400,
+                'response_message' => 'User id is required.',
+            ]);
+        }
+
+        if ($currentPassword === null) {
+            return response()->json([
+                'response_code'    => 400,
+                'response_message' => 'Current password is required.',
+            ]);
+        }
+
+        $user = User::find($user_id);
+
+        if ($user === null) {
+            return response()->json([
+                'response_code'    => 404,
+                'response_message' => 'User not found.',
+            ]);
+        }
+
+        $deleteKey = 'user_delete:' . $user->id;
+        if (RateLimiter::tooManyAttempts($deleteKey, 5)) {
+            $seconds = RateLimiter::availableIn($deleteKey);
+
+            return response()->json([
+                'response_code'    => 429,
+                'response_message' => 'Too many delete attempts. Please try again in ' . $seconds . ' seconds.',
+            ]);
+        }
+
+        RateLimiter::hit($deleteKey, 300);
+
+        if (! Hash::check($currentPassword, $user->password)) {
+            return response()->json([
+                'response_code'    => 400,
+                'response_message' => 'Current password is wrong.',
+            ]);
+        }
+
+        DB::transaction(function () use ($user): void {
+            ResetPassword::where('email', $user->email)->delete();
+            $user->tokens()->delete();
+            $user->delete();
+        });
+
+        RateLimiter::clear($deleteKey);
+
+        return response()->json([
+            'response_code'    => 200,
+            'response_message' => 'User deleted successfully',
+        ], 200);
     }
 
     public function changepassword(Request $request): JsonResponse
